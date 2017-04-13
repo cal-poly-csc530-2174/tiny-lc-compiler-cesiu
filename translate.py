@@ -34,6 +34,10 @@ def translate(sexp, fun_defs):
             return "(%s %s %s)" % (translate(sexp[1], fun_defs),\
                                    sexp[0].value(),\
                                    translate(sexp[2], fun_defs))
+        elif len(sexp) == 4 and sexp[0] == Symbol("ifleq0"):
+            return "(%s if %s <= 0 else %s)" % (translate(sexp[2], fun_defs),\
+                                                translate(sexp[1], fun_defs),\
+                                                translate(sexp[3], fun_defs))
     elif isinstance(sexp, int) or isinstance(sexp, float):
         return str(sexp)
     else:
