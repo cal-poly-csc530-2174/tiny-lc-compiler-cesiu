@@ -27,7 +27,7 @@ _footer = "if __name__ == \"__main__\":\n"\
 
 def translate(sexp, fun_defs):
     if isinstance(sexp, Symbol):
-        pass
+        return sexp.value()
     elif isinstance(sexp, list):
         if len(sexp) == 2 and sexp[0] == Symbol("println"):
             return "lprintln(%s)" % translate(sexp[1], fun_defs) 
@@ -40,6 +40,14 @@ def translate(sexp, fun_defs):
             return "(%s if %s <= 0 else %s)" % (translate(sexp[2], fun_defs),\
                                                 translate(sexp[1], fun_defs),\
                                                 translate(sexp[3], fun_defs))
+        elif len(sexp) == 3 and sexp[0] == Symbol("λ"):
+            name = "lam%d" % (len(fun_defs) - 1)
+            fun_defs.append("def %s(%s):\n    return %s\n"\
+             % (name, sexp[1][0].value(), translate(sexp[2], fun_defs)))
+            return name
+        elif len(sexp) == 2:
+            return "%s(%s)" % (translate(sexp[0], fun_defs),\
+                               translate(sexp[1], fun_defs))
     elif isinstance(sexp, int) or isinstance(sexp, float):
         return str(sexp)
     else:
