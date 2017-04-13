@@ -29,9 +29,11 @@ def translate(sexp, fun_defs):
     elif isinstance(sexp, list):
         if len(sexp) == 2 and sexp[0] == Symbol("println"):
             return "lprintln(%s)" % translate(sexp[1], fun_defs) 
-        elif len(sexp) == 3 and sexp[0] == Symbol("+"):
-            return "(%s + %s)" % (translate(sexp[1], fun_defs),\
-                                  translate(sexp[2], fun_defs))
+        elif len(sexp) == 3 and (sexp[0] == Symbol("+")\
+                              or sexp[0] == Symbol("*")):
+            return "(%s %s %s)" % (translate(sexp[1], fun_defs),\
+                                   sexp[0].value(),\
+                                   translate(sexp[2], fun_defs))
     elif isinstance(sexp, int) or isinstance(sexp, float):
         return str(sexp)
     else:
