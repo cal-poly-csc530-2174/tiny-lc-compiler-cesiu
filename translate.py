@@ -20,8 +20,10 @@ _print_wrapper = "def lprintln(string):\n"\
                  "    print(string)\n"\
                  "    return 0\n"
 
+_header = "import sys\n"
+
 _footer = "if __name__ == \"__main__\":\n"\
-          "    main()\n"
+          "    sys.exit(main())\n"
 
 def translate(sexp, fun_defs):
     if isinstance(sexp, Symbol):
@@ -45,6 +47,7 @@ def translate(sexp, fun_defs):
 
 def main():
     global _print_wrapper
+    global _header
     global _footer
 
     fun_defs = [_print_wrapper]
@@ -55,7 +58,9 @@ def main():
 
     with open(sys.argv[1], "r") as lamc_src,\
          open("%s.py" % ".".join(sys.argv[1].split(".")[:-1]), "w") as py_out:
-        py_out.write("def main():\n    %s\n\n"\
+        py_out.write("%s\n" % _header)
+
+        py_out.write("def main():\n    return %s\n\n"\
                      % translate(parse(lamc_src.read().strip()), fun_defs))
 
         for fun_def in fun_defs:
