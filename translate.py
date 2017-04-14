@@ -29,37 +29,34 @@ _footer = "if __name__ == \"__main__\":\n"\
 # sexp - An S-expression
 # fun_defs - A list of lambda (function) definitions
 # Returns a string of Python code.
-def translate(sexp, fun_defs):
+def translate(sexp):
     # If it's a symbol, convert it to a string.
     if isinstance(sexp, Symbol):
         return sexp.value()
     elif isinstance(sexp, list):
         # If it's a println, replace it with our custom print.
         if len(sexp) == 2 and sexp[0] == Symbol("println"):
-            return "lprintln(%s)" % translate(sexp[1], fun_defs)
+            return "lprintln(%s)" % translate(sexp[1])
         # If it's a binop...
         elif len(sexp) == 3 and (sexp[0] == Symbol("+")\
                               or sexp[0] == Symbol("*")):
-            return "(%s %s %s)" % (translate(sexp[1], fun_defs),\
+            return "(%s %s %s)" % (translate(sexp[1]),\
                                    sexp[0].value(),\
-                                   translate(sexp[2], fun_defs))
+                                   translate(sexp[2]))
         # If it's an ifleq0, convert it to a ternary expression.
         elif len(sexp) == 4 and sexp[0] == Symbol("ifleq0"):
-            return "(%s if %s <= 0 else %s)" % (translate(sexp[2], fun_defs),\
-                                                translate(sexp[1], fun_defs),\
-                                                translate(sexp[3], fun_defs))
+            return "(%s if %s <= 0 else %s)" % (translate(sexp[2]),\
+                                                translate(sexp[1]),\
+                                                translate(sexp[3]))
         # If it's a lambda, add it to the list of def'ns and return the name.
         elif len(sexp) == 3 and sexp[0] == Symbol("λ"):
-            lam_num = len(fun_defs)
-            fun_defs.append("")
-            body = translate(sexp[2], fun_defs)
-            fun_defs.append("def lam%d(%s):\n    return %s\n"\
-             % (lam_num, sexp[1][0].value(), body))
-            return "lam%d" % lam_num
+            return "(lambda %s : (%s))" % \
+                (sexp[1][0].value(), translate(sexp[2]))
+
         # If it's an application...
         elif len(sexp) == 2:
-            return "%s(%s)" % (translate(sexp[0], fun_defs),\
-                               translate(sexp[1], fun_defs))
+            return "(%s(%s))" % (translate(sexp[0]),\
+                               translate(sexp[1]))
         # Otherwise raise an exception.
         else:
             raise Exception("%r is not a well-formed expression." % sexp) 
@@ -86,7 +83,7 @@ def main():
         py_out.write("%s\n" % _header)
 
         py_out.write("def main():\n    return %s\n\n"\
-                     % translate(parse(lamc_src.read().strip()), fun_defs))
+                     % translate(parse(lamc_src.read().strip())))
 
         for fun_def in fun_defs:
             py_out.write("%s\n" % fun_def)
