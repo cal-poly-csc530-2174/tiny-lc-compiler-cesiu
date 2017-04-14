@@ -50,10 +50,12 @@ def translate(sexp, fun_defs):
                                                 translate(sexp[3], fun_defs))
         # If it's a lambda, add it to the list of def'ns and return the name.
         elif len(sexp) == 3 and sexp[0] == Symbol("λ"):
-            name = "lam%d" % (len(fun_defs) - 1)
-            fun_defs.append("def %s(%s):\n    return %s\n"\
-             % (name, sexp[1][0].value(), translate(sexp[2], fun_defs)))
-            return name
+            lam_num = len(fun_defs)
+            fun_defs.append("")
+            body = translate(sexp[2], fun_defs)
+            fun_defs.append("def lam%d(%s):\n    return %s\n"\
+             % (lam_num, sexp[1][0].value(), body))
+            return "lam%d" % lam_num
         # If it's an application...
         elif len(sexp) == 2:
             return "%s(%s)" % (translate(sexp[0], fun_defs),\
