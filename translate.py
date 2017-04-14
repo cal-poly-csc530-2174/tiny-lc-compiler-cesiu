@@ -48,7 +48,7 @@ def translate(sexp):
             return "(%s if %s <= 0 else %s)" % (translate(sexp[2]),\
                                                 translate(sexp[1]),\
                                                 translate(sexp[3]))
-        # If it's a lambda, add it to the list of def'ns and return the name.
+        # If it's a lambda...
         elif len(sexp) == 3 and sexp[0] == Symbol("λ"):
             return "(lambda %s : (%s))" % \
                 (sexp[1][0].value(), translate(sexp[2]))
